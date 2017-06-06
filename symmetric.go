@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	KeySize                  = chacha20poly1305.KeySize
 	chacha20poly1305Overhead = 16
 	MACOverhead              = chacha20poly1305Overhead
 	Overhead                 = chacha20poly1305.NonceSize + MACOverhead
@@ -27,14 +26,17 @@ var (
 )
 
 type SymmetricLocker struct {
-	KeySize int
 }
 
-func NewSymmetric() *SymmetricLocker {
-	l := &SymmetricLocker{
-		KeySize: KeySize,
+var Symmetric = &SymmetricLocker{}
+
+func (s *SymmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
+	key := make([]byte, chacha20poly1305.KeySize)
+	_, err = io.ReadFull(rand.Reader, key)
+	if err != nil {
+		return nil, nil, err
 	}
-	return l
+	return key, key, nil
 }
 
 func (s *SymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
