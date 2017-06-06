@@ -37,10 +37,10 @@ func ed25519PublicFromPrivate(sk []byte) []byte {
 }
 
 func (s *ScrambleSignedLocker) deriveSymmetricKey(keymaterial, nonce []byte) ([]byte, error) {
-	b2xcfg := blake2xb.NewXConfig(uint32(chacha20poly1305.KeySize))
+	b2xcfg := blake2xb.NewConfig(uint32(chacha20poly1305.KeySize))
 	b2xcfg.Salt = nonce
 	b2xcfg.Person = []byte("scamblesigned")
-	b2x, err := blake2xb.NewX(b2xcfg)
+	b2x, err := blake2xb.NewWithConfig(b2xcfg)
 	if err != nil {
 		return nil, err
 	}
