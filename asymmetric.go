@@ -14,23 +14,14 @@ import (
 	"golang.org/x/crypto/curve25519"
 )
 
-const (
-	curve25519KeySize = 32
-)
+const curve25519KeySize = 32
 
 type AsymmetricLocker struct {
 	KeySize    int
 	PrivateKey []byte
-	sl         SealOpener
 }
 
-func NewAsymmetric() *AsymmetricLocker {
-	l := &AsymmetricLocker{
-		KeySize: 2 * curve25519KeySize,
-		sl:      NewSymmetric(),
-	}
-	return l
-}
+var Asymmetric = &AsymmetricLocker{KeySize: 2 * curve25519KeySize}
 
 var zeros [chacha20.HNonceSize]byte
 
@@ -65,7 +56,7 @@ func (s *AsymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return s.sl.Seal(pt, sharedKey)
+	return Symmetric.Seal(pt, sharedKey)
 }
 
 func (s *AsymmetricLocker) Open(ct, key []byte) ([]byte, error) {
@@ -73,5 +64,5 @@ func (s *AsymmetricLocker) Open(ct, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return s.sl.Open(ct, sharedKey)
+	return Symmetric.Open(ct, sharedKey)
 }
