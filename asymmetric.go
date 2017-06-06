@@ -14,18 +14,14 @@ import (
 	"golang.org/x/crypto/curve25519"
 )
 
-const curve25519KeySize = 32
-
 type AsymmetricLocker struct {
-	KeySize    int
-	PrivateKey []byte
 }
 
-var Asymmetric = &AsymmetricLocker{KeySize: 2 * curve25519KeySize}
+var Asymmetric = &AsymmetricLocker{}
 
 var zeros [chacha20.HNonceSize]byte
 
-func (s *AsymmetricLocker) GenerateKeypair(r io.Reader) (publicKey, privateKey []byte, err error) {
+func (s *AsymmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
 	var pk, sk [32]byte
 	_, err = io.ReadFull(r, sk[:])
 	if err != nil {
