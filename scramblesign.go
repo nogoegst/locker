@@ -24,9 +24,7 @@ var (
 type ScrambleSignedLocker struct {
 }
 
-func NewScrambleSigned() *ScrambleSignedLocker {
-	return &ScrambleSignedLocker{}
-}
+var ScrambleSigned = &ScrambleSignedLocker{}
 
 func (s *ScrambleSignedLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
 	return ed25519.GenerateKey(r)
