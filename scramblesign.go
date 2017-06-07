@@ -22,11 +22,13 @@ var (
 )
 
 type ScrambleSignedLocker struct {
-	Overhead int
+	Overhead         int
+	MaxPaddingLength int
 }
 
 var ScrambleSigned = &ScrambleSignedLocker{
-	Overhead: Symmetric.Overhead + signatureSize,
+	Overhead:         aeadOverhead + signatureSize,
+	MaxPaddingLength: defaultMaxPaddingLength,
 }
 
 func (s *ScrambleSignedLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
@@ -78,7 +80,11 @@ func (s *ScrambleSignedLocker) Seal(pt, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	ct := c.Seal(nonce, nonce, append(sig, pt...), nil)
+	signedpt := append(sig, pt...)
+	padlen, binpadlen := PaddingLength(s.MaxPaddingLength, nonce, secretkey)
+	paddedpt := make([]byte, padlen+len(signedpt))
+	copy(paddedpt[padlen:], signedpt)
+	ct := c.Seal(nonce, nonce, paddedpt, binpadlen)
 	return ct, nil
 }
 
@@ -96,13 +102,20 @@ func (s *ScrambleSignedLocker) Open(ct, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	pt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], nil)
+	padlen, binpadlen := PaddingLength(s.MaxPaddingLength, nonce, secretkey)
+	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], binpadlen)
 	if err != nil {
 		return nil, err
 	}
-	ok := ed25519.Verify(ed25519.PublicKey(key), pt[64:], pt[:64])
+	if len(paddedpt) < padlen {
+		return nil, ErrInvalidSize
+	}
+	signedpt := paddedpt[padlen:]
+	sig := signedpt[:ed25519.SignatureSize]
+	pt := signedpt[ed25519.SignatureSize:]
+	ok := ed25519.Verify(ed25519.PublicKey(key), pt, sig)
 	if !ok {
 		return nil, ErrBadSignature
 	}
-	return pt[64:], nil
+	return pt, nil
 }
