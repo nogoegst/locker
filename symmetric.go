@@ -20,11 +20,13 @@ var (
 )
 
 type SymmetricLocker struct {
-	Overhead int
+	Overhead         int
+	MaxPaddingLength int
 }
 
 var Symmetric = &SymmetricLocker{
-	Overhead: aeadOverhead,
+	Overhead:         aeadOverhead,
+	MaxPaddingLength: defaultMaxPaddingLength,
 }
 
 func (s *SymmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
@@ -46,7 +48,10 @@ func (s *SymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	ct := c.Seal(nonce, nonce, pt, nil)
+	padlen, binpadlen := PaddingLength(s.MaxPaddingLength, nonce, key)
+	paddedpt := make([]byte, padlen+len(pt))
+	copy(paddedpt[padlen:], pt)
+	ct := c.Seal(nonce, nonce, paddedpt, binpadlen)
 	return ct, nil
 }
 
@@ -58,6 +63,15 @@ func (s *SymmetricLocker) Open(ct, key []byte) ([]byte, error) {
 	if len(ct) < chacha20poly1305.NonceSize {
 		return nil, ErrInvalidSize
 	}
-	pt, err := c.Open(nil, ct[:chacha20poly1305.NonceSize], ct[chacha20poly1305.NonceSize:], nil)
-	return pt, err
+	nonce := ct[:chacha20poly1305.NonceSize]
+	padlen, binpadlen := PaddingLength(s.MaxPaddingLength, nonce, key)
+	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], binpadlen)
+	if err != nil {
+		return nil, err
+	}
+	if len(paddedpt) < padlen {
+		return nil, ErrInvalidSize
+	}
+	pt := paddedpt[padlen:]
+	return pt, nil
 }

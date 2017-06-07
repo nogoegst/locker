@@ -14,6 +14,7 @@ import (
 )
 
 const (
-	aeadOverhead  = chacha20poly1305.NonceSize + poly1305.TagSize
-	signatureSize = ed25519.SignatureSize
+	aeadOverhead            = chacha20poly1305.NonceSize + poly1305.TagSize
+	signatureSize           = ed25519.SignatureSize
+	defaultMaxPaddingLength = 16
 )
