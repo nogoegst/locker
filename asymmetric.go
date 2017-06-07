@@ -15,9 +15,12 @@ import (
 )
 
 type AsymmetricLocker struct {
+	Overhead int
 }
 
-var Asymmetric = &AsymmetricLocker{}
+var Asymmetric = &AsymmetricLocker{
+	Overhead: aeadOverhead,
+}
 
 var zeros [chacha20.HNonceSize]byte
 

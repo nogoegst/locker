@@ -15,20 +15,17 @@ import (
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
-const (
-	chacha20poly1305Overhead = 16
-	MACOverhead              = chacha20poly1305Overhead
-	Overhead                 = chacha20poly1305.NonceSize + MACOverhead
-)
-
 var (
 	ErrInvalidSize = errors.New("invalid ciphertext size")
 )
 
 type SymmetricLocker struct {
+	Overhead int
 }
 
-var Symmetric = &SymmetricLocker{}
+var Symmetric = &SymmetricLocker{
+	Overhead: aeadOverhead,
+}
 
 func (s *SymmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
 	key := make([]byte, chacha20poly1305.KeySize)

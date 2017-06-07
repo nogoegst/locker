@@ -22,9 +22,12 @@ var (
 )
 
 type ScrambleSignedLocker struct {
+	Overhead int
 }
 
-var ScrambleSigned = &ScrambleSignedLocker{}
+var ScrambleSigned = &ScrambleSignedLocker{
+	Overhead: aeadOverhead + signatureSize,
+}
 
 func (s *ScrambleSignedLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
 	return ed25519.GenerateKey(r)
@@ -80,7 +83,7 @@ func (s *ScrambleSignedLocker) Seal(pt, key []byte) ([]byte, error) {
 }
 
 func (s *ScrambleSignedLocker) Open(ct, key []byte) ([]byte, error) {
-	if len(ct) < chacha20poly1305.NonceSize+ed25519.SignatureSize+chacha20poly1305Overhead {
+	if len(ct) < s.Overhead {
 		return nil, ErrInvalidSize
 	}
 	nonce := ct[:chacha20poly1305.NonceSize]
