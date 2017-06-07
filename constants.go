@@ -10,9 +10,10 @@ package locker
 import (
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/ed25519"
+	"golang.org/x/crypto/poly1305"
 )
 
 const (
-	aeadOverhead  = chacha20poly1305.NonceSize + 16 // 16 is the size of poly1305
+	aeadOverhead  = chacha20poly1305.NonceSize + poly1305.TagSize
 	signatureSize = ed25519.SignatureSize
 )

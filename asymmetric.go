@@ -19,7 +19,7 @@ type AsymmetricLocker struct {
 }
 
 var Asymmetric = &AsymmetricLocker{
-	Overhead: aeadOverhead,
+	Overhead: Symmetric.Overhead,
 }
 
 var zeros [chacha20.HNonceSize]byte

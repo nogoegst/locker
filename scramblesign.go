@@ -26,7 +26,7 @@ type ScrambleSignedLocker struct {
 }
 
 var ScrambleSigned = &ScrambleSignedLocker{
-	Overhead: aeadOverhead + signatureSize,
+	Overhead: Symmetric.Overhead + signatureSize,
 }
 
 func (s *ScrambleSignedLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
