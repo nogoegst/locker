@@ -12,19 +12,19 @@ import (
 	"io"
 )
 
-type NoopLocker struct {
+type noopLocker struct {
 }
 
-var Noop = &NoopLocker{}
+var Noop = &noopLocker{}
 
-func (s *NoopLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
+func (s *noopLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
 	return nil, nil, errors.New("pointless operation")
 }
 
-func (s *NoopLocker) Seal(pt, key []byte) ([]byte, error) {
+func (s *noopLocker) Seal(pt, key []byte) ([]byte, error) {
 	return pt, nil
 }
 
-func (s *NoopLocker) Open(ct, key []byte) ([]byte, error) {
+func (s *noopLocker) Open(ct, key []byte) ([]byte, error) {
 	return ct, nil
 }

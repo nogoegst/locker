@@ -19,17 +19,17 @@ var (
 	ErrInvalidSize = errors.New("invalid ciphertext size")
 )
 
-type SymmetricLocker struct {
+type symmetricLocker struct {
 	Overhead         int
 	MaxPaddingLength int
 }
 
-var Symmetric = &SymmetricLocker{
+var Symmetric = &symmetricLocker{
 	Overhead:         aeadOverhead,
 	MaxPaddingLength: defaultMaxPaddingLength,
 }
 
-func (s *SymmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
+func (s *symmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
 	key := make([]byte, chacha20poly1305.KeySize)
 	_, err = io.ReadFull(rand.Reader, key)
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *SymmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte
 	return key, key, nil
 }
 
-func (s *SymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
+func (s *symmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 	c, err := chacha20poly1305.New(key)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (s *SymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 	return ct, nil
 }
 
-func (s *SymmetricLocker) Open(ct, key []byte) ([]byte, error) {
+func (s *symmetricLocker) Open(ct, key []byte) ([]byte, error) {
 	c, err := chacha20poly1305.New(key)
 	if err != nil {
 		return nil, err

@@ -21,17 +21,17 @@ var (
 	ErrBadSignature = errors.New("bad signature")
 )
 
-type ScrambleSignedLocker struct {
+type scrambleSignedLocker struct {
 	Overhead         int
 	MaxPaddingLength int
 }
 
-var ScrambleSigned = &ScrambleSignedLocker{
+var ScrambleSigned = &scrambleSignedLocker{
 	Overhead:         aeadOverhead + signatureSize,
 	MaxPaddingLength: defaultMaxPaddingLength,
 }
 
-func (s *ScrambleSignedLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
+func (s *scrambleSignedLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
 	return ed25519.GenerateKey(r)
 }
 
@@ -41,7 +41,7 @@ func ed25519PublicFromPrivate(sk []byte) []byte {
 	return pk
 }
 
-func (s *ScrambleSignedLocker) deriveSymmetricKey(keymaterial, nonce []byte) ([]byte, error) {
+func (s *scrambleSignedLocker) deriveSymmetricKey(keymaterial, nonce []byte) ([]byte, error) {
 	b2xcfg := blake2xb.NewConfig(uint32(chacha20poly1305.KeySize))
 	b2xcfg.Salt = nonce
 	b2xcfg.Person = []byte("scamblesigned")
@@ -61,7 +61,7 @@ func (s *ScrambleSignedLocker) deriveSymmetricKey(keymaterial, nonce []byte) ([]
 	return key, nil
 }
 
-func (s *ScrambleSignedLocker) Seal(pt, key []byte) ([]byte, error) {
+func (s *scrambleSignedLocker) Seal(pt, key []byte) ([]byte, error) {
 	sig := ed25519.Sign(ed25519.PrivateKey(key), pt)
 
 	nonce := make([]byte, chacha20poly1305.NonceSize)
@@ -87,7 +87,7 @@ func (s *ScrambleSignedLocker) Seal(pt, key []byte) ([]byte, error) {
 	return ct, nil
 }
 
-func (s *ScrambleSignedLocker) Open(ct, key []byte) ([]byte, error) {
+func (s *scrambleSignedLocker) Open(ct, key []byte) ([]byte, error) {
 	if len(ct) < s.Overhead {
 		return nil, ErrInvalidSize
 	}

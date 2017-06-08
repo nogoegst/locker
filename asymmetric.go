@@ -14,17 +14,17 @@ import (
 	"golang.org/x/crypto/curve25519"
 )
 
-type AsymmetricLocker struct {
+type asymmetricLocker struct {
 	Overhead int
 }
 
-var Asymmetric = &AsymmetricLocker{
+var Asymmetric = &asymmetricLocker{
 	Overhead: Symmetric.Overhead,
 }
 
 var zeros [chacha20.HNonceSize]byte
 
-func (s *AsymmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
+func (s *asymmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
 	var pk, sk [32]byte
 	_, err = io.ReadFull(r, sk[:])
 	if err != nil {
@@ -35,12 +35,12 @@ func (s *AsymmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byt
 	return
 }
 
-func (s *AsymmetricLocker) Precompute(sharedKey, privateKey, publicKey *[32]byte) {
+func (s *asymmetricLocker) Precompute(sharedKey, privateKey, publicKey *[32]byte) {
 	curve25519.ScalarMult(sharedKey, privateKey, publicKey)
 	chacha20.HChaCha(sharedKey[:], &zeros, sharedKey)
 }
 
-func (s *AsymmetricLocker) unpackAndDerive(key []byte) ([]byte, error) {
+func (s *asymmetricLocker) unpackAndDerive(key []byte) ([]byte, error) {
 	var sharedKey [32]byte
 	var privateKey [32]byte
 	var theirPublicKey [32]byte
@@ -50,7 +50,7 @@ func (s *AsymmetricLocker) unpackAndDerive(key []byte) ([]byte, error) {
 	return sharedKey[:], nil
 }
 
-func (s *AsymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
+func (s *asymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 	sharedKey, err := s.unpackAndDerive(key)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (s *AsymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 	return Symmetric.Seal(pt, sharedKey)
 }
 
-func (s *AsymmetricLocker) Open(ct, key []byte) ([]byte, error) {
+func (s *asymmetricLocker) Open(ct, key []byte) ([]byte, error) {
 	sharedKey, err := s.unpackAndDerive(key)
 	if err != nil {
 		return nil, err
