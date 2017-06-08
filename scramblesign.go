@@ -13,6 +13,7 @@ import (
 	"io"
 
 	"github.com/nogoegst/blake2xb"
+	"github.com/nogoegst/padding"
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/ed25519"
 )
@@ -81,9 +82,9 @@ func (s *scrambleSignedLocker) Seal(pt, key []byte) ([]byte, error) {
 		return nil, err
 	}
 	signedpt := append(sig, pt...)
-	padlen := PaddingLength(s.MaxPaddingLength, nonce, secretkey)
-	paddedpt := Pad(signedpt, padlen)
-	ct := c.Seal(nonce, nonce, paddedpt, IntToBinary(s.MaxPaddingLength))
+	padlen := padding.Length(s.MaxPaddingLength, nonce, secretkey)
+	paddedpt := padding.Pad(signedpt, padlen)
+	ct := c.Seal(nonce, nonce, paddedpt, padding.IntToBinary(s.MaxPaddingLength))
 	return ct, nil
 }
 
@@ -101,12 +102,12 @@ func (s *scrambleSignedLocker) Open(ct, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	padlen := PaddingLength(s.MaxPaddingLength, nonce, secretkey)
-	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], IntToBinary(s.MaxPaddingLength))
+	padlen := padding.Length(s.MaxPaddingLength, nonce, secretkey)
+	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], padding.IntToBinary(s.MaxPaddingLength))
 	if err != nil {
 		return nil, err
 	}
-	signedpt, err := Unpad(paddedpt, padlen)
+	signedpt, err := padding.Unpad(paddedpt, padlen)
 	if err != nil {
 		return nil, err
 	}

@@ -12,6 +12,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/nogoegst/padding"
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
@@ -48,9 +49,9 @@ func (s *symmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	padlen := PaddingLength(s.MaxPaddingLength, nonce, key)
-	paddedpt := Pad(pt, padlen)
-	ct := c.Seal(nonce, nonce, paddedpt, IntToBinary(s.MaxPaddingLength))
+	padlen := padding.Length(s.MaxPaddingLength, nonce, key)
+	paddedpt := padding.Pad(pt, padlen)
+	ct := c.Seal(nonce, nonce, paddedpt, padding.IntToBinary(s.MaxPaddingLength))
 	return ct, nil
 }
 
@@ -63,12 +64,12 @@ func (s *symmetricLocker) Open(ct, key []byte) ([]byte, error) {
 		return nil, ErrInvalidSize
 	}
 	nonce := ct[:chacha20poly1305.NonceSize]
-	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], IntToBinary(s.MaxPaddingLength))
+	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], padding.IntToBinary(s.MaxPaddingLength))
 	if err != nil {
 		return nil, err
 	}
-	padlen := PaddingLength(s.MaxPaddingLength, nonce, key)
-	pt, err := Unpad(paddedpt, padlen)
+	padlen := padding.Length(s.MaxPaddingLength, nonce, key)
+	pt, err := padding.Unpad(paddedpt, padlen)
 	if err != nil {
 		return nil, err
 	}
