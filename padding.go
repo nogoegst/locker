@@ -12,15 +12,16 @@ import (
 	"encoding/binary"
 	"errors"
 	"golang.org/x/crypto/blake2b"
+	"math"
 )
 
 // PaddingLength calculates length of padding for given nonce and key
 // in range [0:maxlen). maxlen must be a power of two and maxlen < 2^32-1.
-func PaddingLength(maxlen int, nonce, key []byte) (int, []byte) {
-	max := uint32(maxlen)
-	if max != (max << 1 >> 1) {
-		panic("max is out of range")
+func PaddingLength(maxlen int, nonce, key []byte) int {
+	if !isUint32(maxlen) {
+		panic("maxlen is out of range")
 	}
+	max := uint32(maxlen)
 	if max&(max-1) != 0 {
 		panic("max padding length is not power of two")
 	}
@@ -33,9 +34,18 @@ func PaddingLength(maxlen int, nonce, key []byte) (int, []byte) {
 
 	r := binary.BigEndian.Uint32(d[:4])
 	padlen := r & (max - 1)
-	binpadlen := make([]byte, 4)
-	binary.BigEndian.PutUint32(binpadlen, padlen)
-	return int(padlen), binpadlen
+	return int(padlen)
+}
+
+// IntToBinary encodes i into a byte slice as uint32.
+// It panics if i is not a valid uint32.
+func IntToBinary(i int) []byte {
+	if !isUint32(i) {
+		panic("integer is out of range")
+	}
+	bini := make([]byte, 4)
+	binary.BigEndian.PutUint32(bini, uint32(i))
+	return bini
 }
 
 // Pad prepends padlen zero bytes to pt.
@@ -52,4 +62,11 @@ func Unpad(paddedpt []byte, padlen int) ([]byte, error) {
 	}
 	pt := paddedpt[padlen:]
 	return pt, nil
+}
+
+func isUint32(i int) bool {
+	if i >= 0 && i < math.MaxUint32 {
+		return true
+	}
+	return false
 }

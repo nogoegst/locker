@@ -48,9 +48,9 @@ func (s *SymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	padlen, binpadlen := PaddingLength(s.MaxPaddingLength, nonce, key)
+	padlen := PaddingLength(s.MaxPaddingLength, nonce, key)
 	paddedpt := Pad(pt, padlen)
-	ct := c.Seal(nonce, nonce, paddedpt, binpadlen)
+	ct := c.Seal(nonce, nonce, paddedpt, IntToBinary(s.MaxPaddingLength))
 	return ct, nil
 }
 
@@ -63,11 +63,11 @@ func (s *SymmetricLocker) Open(ct, key []byte) ([]byte, error) {
 		return nil, ErrInvalidSize
 	}
 	nonce := ct[:chacha20poly1305.NonceSize]
-	padlen, binpadlen := PaddingLength(s.MaxPaddingLength, nonce, key)
-	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], binpadlen)
+	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], IntToBinary(s.MaxPaddingLength))
 	if err != nil {
 		return nil, err
 	}
+	padlen := PaddingLength(s.MaxPaddingLength, nonce, key)
 	pt, err := Unpad(paddedpt, padlen)
 	if err != nil {
 		return nil, err
