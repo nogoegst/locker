@@ -49,8 +49,7 @@ func (s *SymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 		return nil, err
 	}
 	padlen, binpadlen := PaddingLength(s.MaxPaddingLength, nonce, key)
-	paddedpt := make([]byte, padlen+len(pt))
-	copy(paddedpt[padlen:], pt)
+	paddedpt := Pad(pt, padlen)
 	ct := c.Seal(nonce, nonce, paddedpt, binpadlen)
 	return ct, nil
 }
@@ -69,9 +68,9 @@ func (s *SymmetricLocker) Open(ct, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(paddedpt) < padlen {
-		return nil, ErrInvalidSize
+	pt, err := Unpad(paddedpt, padlen)
+	if err != nil {
+		return nil, err
 	}
-	pt := paddedpt[padlen:]
 	return pt, nil
 }

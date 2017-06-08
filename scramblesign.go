@@ -82,8 +82,7 @@ func (s *ScrambleSignedLocker) Seal(pt, key []byte) ([]byte, error) {
 	}
 	signedpt := append(sig, pt...)
 	padlen, binpadlen := PaddingLength(s.MaxPaddingLength, nonce, secretkey)
-	paddedpt := make([]byte, padlen+len(signedpt))
-	copy(paddedpt[padlen:], signedpt)
+	paddedpt := Pad(signedpt, padlen)
 	ct := c.Seal(nonce, nonce, paddedpt, binpadlen)
 	return ct, nil
 }
@@ -107,10 +106,10 @@ func (s *ScrambleSignedLocker) Open(ct, key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(paddedpt) < padlen {
-		return nil, ErrInvalidSize
+	signedpt, err := Unpad(paddedpt, padlen)
+	if err != nil {
+		return nil, err
 	}
-	signedpt := paddedpt[padlen:]
 	sig := signedpt[:ed25519.SignatureSize]
 	pt := signedpt[ed25519.SignatureSize:]
 	ok := ed25519.Verify(ed25519.PublicKey(key), pt, sig)
