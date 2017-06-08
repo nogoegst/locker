@@ -2,7 +2,7 @@ package locker
 
 import (
 	"encoding/binary"
-	"github.com/nogoegst/blake2xb"
+	"golang.org/x/crypto/blake2b"
 )
 
 // PaddingLength calculates length of padding for given nonce and key
@@ -15,14 +15,12 @@ func PaddingLength(maxlen int, nonce, key []byte) (int, []byte) {
 	if max&(max-1) != 0 {
 		panic("max padding length is not power of two")
 	}
-	b2xc := blake2xb.NewConfig(8)
-	b2xc.Key = nonce
-	b2x, err := blake2xb.NewWithConfig(b2xc)
+	h, err := blake2b.New256(key)
 	if err != nil {
 		panic(err)
 	}
-	b2x.Write(key)
-	d := b2x.Sum(nil)
+	h.Write(nonce)
+	d := h.Sum(nil)
 
 	r := binary.BigEndian.Uint32(d[:4])
 	padlen := r & (max - 1)
