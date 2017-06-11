@@ -12,8 +12,8 @@ import (
 	"errors"
 	"io"
 
+	"github.com/nogoegst/chacha20poly1305"
 	"github.com/nogoegst/padding"
-	"golang.org/x/crypto/chacha20poly1305"
 )
 
 var (

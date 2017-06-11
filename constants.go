@@ -8,13 +8,12 @@
 package locker
 
 import (
-	"golang.org/x/crypto/chacha20poly1305"
+	"github.com/nogoegst/chacha20poly1305"
 	"golang.org/x/crypto/ed25519"
-	"golang.org/x/crypto/poly1305"
 )
 
 const (
-	aeadOverhead            = chacha20poly1305.NonceSize + poly1305.TagSize
+	aeadOverhead            = chacha20poly1305.NonceSize + chacha20poly1305.Overhead
 	signatureSize           = ed25519.SignatureSize
 	defaultMaxPaddingLength = 16
 )
