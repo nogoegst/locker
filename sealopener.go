@@ -8,11 +8,11 @@
 package locker
 
 type Sealer interface {
-	Seal(pt, key []byte) ([]byte, error)
+	Seal(key, plaintext, additionalData []byte) ([]byte, error)
 }
 
 type Opener interface {
-	Open(ct, key []byte) ([]byte, error)
+	Open(key, ciphertext, additionalData []byte) ([]byte, error)
 }
 
 type SealOpener interface {

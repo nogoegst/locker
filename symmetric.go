@@ -39,7 +39,7 @@ func (s *symmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte
 	return key, key, nil
 }
 
-func (s *symmetricLocker) Seal(pt, key []byte) ([]byte, error) {
+func (s *symmetricLocker) Seal(key, pt, adata []byte) ([]byte, error) {
 	c, err := chacha20poly1305.New(key)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (s *symmetricLocker) Seal(pt, key []byte) ([]byte, error) {
 	return ct, nil
 }
 
-func (s *symmetricLocker) Open(ct, key []byte) ([]byte, error) {
+func (s *symmetricLocker) Open(key, ct, adata []byte) ([]byte, error) {
 	c, err := chacha20poly1305.New(key)
 	if err != nil {
 		return nil, err

@@ -50,18 +50,18 @@ func (s *asymmetricLocker) unpackAndDerive(key []byte) ([]byte, error) {
 	return sharedKey[:], nil
 }
 
-func (s *asymmetricLocker) Seal(pt, key []byte) ([]byte, error) {
+func (s *asymmetricLocker) Seal(key, pt, adata []byte) ([]byte, error) {
 	sharedKey, err := s.unpackAndDerive(key)
 	if err != nil {
 		return nil, err
 	}
-	return Symmetric.Seal(pt, sharedKey)
+	return Symmetric.Seal(sharedKey, pt, adata)
 }
 
-func (s *asymmetricLocker) Open(ct, key []byte) ([]byte, error) {
+func (s *asymmetricLocker) Open(key, ct, adata []byte) ([]byte, error) {
 	sharedKey, err := s.unpackAndDerive(key)
 	if err != nil {
 		return nil, err
 	}
-	return Symmetric.Open(ct, sharedKey)
+	return Symmetric.Open(sharedKey, ct, adata)
 }

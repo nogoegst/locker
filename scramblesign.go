@@ -62,7 +62,7 @@ func (s *scrambleSignedLocker) deriveSymmetricKey(keymaterial, nonce []byte) ([]
 	return key, nil
 }
 
-func (s *scrambleSignedLocker) Seal(pt, key []byte) ([]byte, error) {
+func (s *scrambleSignedLocker) Seal(key, pt, adata []byte) ([]byte, error) {
 	sig := ed25519.Sign(ed25519.PrivateKey(key), pt)
 
 	nonce := make([]byte, chacha20poly1305.NonceSize)
@@ -88,7 +88,7 @@ func (s *scrambleSignedLocker) Seal(pt, key []byte) ([]byte, error) {
 	return ct, nil
 }
 
-func (s *scrambleSignedLocker) Open(ct, key []byte) ([]byte, error) {
+func (s *scrambleSignedLocker) Open(key, ct, adata []byte) ([]byte, error) {
 	if len(ct) < s.Overhead {
 		return nil, ErrInvalidSize
 	}

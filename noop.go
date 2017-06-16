@@ -21,10 +21,10 @@ func (s *noopLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err
 	return nil, nil, errors.New("pointless operation")
 }
 
-func (s *noopLocker) Seal(pt, key []byte) ([]byte, error) {
-	return pt, nil
+func (s *noopLocker) Seal(key, plaintext, additionalData []byte) ([]byte, error) {
+	return nil, nil
 }
 
-func (s *noopLocker) Open(ct, key []byte) ([]byte, error) {
-	return ct, nil
+func (s *noopLocker) Open(key, ciphertext, additionalData []byte) ([]byte, error) {
+	return nil, nil
 }
