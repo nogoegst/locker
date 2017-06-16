@@ -7,6 +7,8 @@
 
 package locker
 
+import "io"
+
 type Sealer interface {
 	Seal(key, plaintext, additionalData []byte) ([]byte, error)
 }
@@ -18,4 +20,9 @@ type Opener interface {
 type SealOpener interface {
 	Sealer
 	Opener
+}
+
+type Locker interface {
+	SealOpener
+	GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error)
 }
