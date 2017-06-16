@@ -84,7 +84,8 @@ func (s *scrambleSignedLocker) Seal(key, pt, adata []byte) ([]byte, error) {
 	signedpt := append(sig, pt...)
 	padlen := padding.Length(s.MaxPaddingLength, nonce, secretkey)
 	paddedpt := padding.Pad(signedpt, padlen)
-	ct := c.Seal(nonce, nonce, paddedpt, padding.IntToBinary(s.MaxPaddingLength))
+	ad := append(padding.IntToBinary(s.MaxPaddingLength), adata...)
+	ct := c.Seal(nonce, nonce, paddedpt, ad)
 	return ct, nil
 }
 
@@ -103,7 +104,8 @@ func (s *scrambleSignedLocker) Open(key, ct, adata []byte) ([]byte, error) {
 		return nil, err
 	}
 	padlen := padding.Length(s.MaxPaddingLength, nonce, secretkey)
-	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], padding.IntToBinary(s.MaxPaddingLength))
+	ad := append(padding.IntToBinary(s.MaxPaddingLength), adata...)
+	paddedpt, err := c.Open(nil, nonce, ct[chacha20poly1305.NonceSize:], ad)
 	if err != nil {
 		return nil, err
 	}
