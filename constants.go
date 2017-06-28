@@ -8,7 +8,7 @@
 package locker
 
 import (
-	"github.com/nogoegst/chacha20poly1305"
+	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/ed25519"
 )
 

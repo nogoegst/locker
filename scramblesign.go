@@ -12,9 +12,9 @@ import (
 	"errors"
 	"io"
 
-	"github.com/nogoegst/blake2xb"
-	"github.com/nogoegst/chacha20poly1305"
 	"github.com/nogoegst/padding"
+	"golang.org/x/crypto/blake2b"
+	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/ed25519"
 )
 
@@ -43,21 +43,14 @@ func ed25519PublicFromPrivate(sk []byte) []byte {
 }
 
 func (s *scrambleSignedLocker) deriveSymmetricKey(keymaterial, nonce []byte) ([]byte, error) {
-	b2xcfg := blake2xb.NewConfig(uint32(chacha20poly1305.KeySize))
-	b2xcfg.Salt = nonce
-	b2xcfg.Person = []byte("scamblesigned")
-	b2x, err := blake2xb.NewWithConfig(b2xcfg)
+	h, err := blake2b.New256(nonce)
 	if err != nil {
 		return nil, err
 	}
-	_, err = b2x.Write(keymaterial)
-	if err != nil {
-		return nil, err
-	}
-	key := make([]byte, chacha20poly1305.KeySize)
-	_, err = io.ReadFull(b2x, key)
-	if err != nil {
-		return nil, err
+	h.Write(keymaterial)
+	key := h.Sum(nil)
+	if len(key) != chacha20poly1305.KeySize {
+		panic("chacha20poly1305 keysize is not 256 bits")
 	}
 	return key, nil
 }
