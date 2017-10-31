@@ -32,7 +32,7 @@ var Symmetric = &symmetricLocker{
 
 func (s *symmetricLocker) GenerateKey(r io.Reader) (publicKey, privateKey []byte, err error) {
 	key := make([]byte, chacha20poly1305.KeySize)
-	_, err = io.ReadFull(rand.Reader, key)
+	_, err = io.ReadFull(r, key)
 	if err != nil {
 		return nil, nil, err
 	}
