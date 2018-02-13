@@ -10,7 +10,7 @@ package locker
 import (
 	"io"
 
-	"git.schwanenlied.me/yawning/chacha20"
+	"github.com/nogoegst/chacha20"
 	"golang.org/x/crypto/curve25519"
 )
 
