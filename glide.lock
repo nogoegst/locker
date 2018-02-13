@@ -1,8 +1,0 @@
-hash: 9248a9fa5e0913c1e08346d98e83ab2134f62299d4810b81d222f8b4a7fdeb03
-updated: 2017-06-28T20:35:10.771617959Z
-imports:
-- name: git.schwanenlied.me/yawning/chacha20
-  version: 70289bb2131350877f4b969b94ac4cf22eef9aa1
-- name: github.com/nogoegst/padding
-  version: 1b6973ced14f758b0367c655afe75ce708944cd4
-testImports: []

@@ -1,6 +1,0 @@
-package: github.com/nogoegst/locker
-ignore:
-- golang.org/x/crypto
-import:
-- package: git.schwanenlied.me/yawning/chacha20
-- package: github.com/nogoegst/padding
